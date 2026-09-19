@@ -60,7 +60,11 @@ when you need to process the result.
    any `scripts/` or `references/` it points to when the instructions call for them.
    Tell the user you loaded it manually so they know the slash form may lag.
 
-4. If a skill is on disk with no errors and still not registered after another turn,
+4. If the user reports "/x isn't a command here" from the desktop app but you have
+   `x` in your own listing, the app's slash-command picker is stale, not the harness.
+   Tell them to send the request as a plain message; do not suggest `/clear` for this.
+
+5. If a skill is on disk with no errors and still not registered after another turn,
    the watcher is probably not running. That is the case in `--bare` mode. `/clear`
    reruns discovery but wipes the conversation, so let them finish anything in
    flight. For a plugin, changes to `hooks/`, `agents/` or `.mcp.json` need

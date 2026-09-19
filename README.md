@@ -117,6 +117,7 @@ The same layout the tool flags as an error — `skills/<name>/SKILL.md` — is t
 - **`--lint` is structural, not semantic.** It catches the description shapes that reliably under-trigger. It doesn't predict whether a given phrase will fire a given skill.
 - **`--audit` is a pattern scan, not a verdict.** Clean means nothing obvious turned up, not that the skill is safe. Read anything it flags `high`.
 - **Plugin `hooks/`, `agents/` and `.mcp.json` changes** need `/reload-plugins`; SKILL.md text doesn't.
+- **The desktop app's `/` picker is a separate cache.** In a session opened before you installed a skill, the app may say "`/skill-rollcall` isn't a command here" even though Claude already has it. Send the request as a normal message instead ("roll call my skills") — that goes to Claude, not the picker. Don't `/clear` a long session just for this.
 
 ## Development
 
