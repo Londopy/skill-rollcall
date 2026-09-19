@@ -1,62 +1,82 @@
 ---
 name: skill-rollcall
-description: Take a roll call of installed skills - refresh Claude's view of them without restarting the session and diagnose any that fail to register. Use this whenever the user says reload skills, refresh skills, rescan skills, re-index skills, roll call, "I just installed a skill", "I just added/edited a SKILL.md", asks whether you can see a particular /skill, or complains that a skill is not showing up or not triggering. Also use it after you yourself install or write a skill mid-session, so you can confirm it registered and diagnose why if it did not.
+description: Take a roll call of installed skills - see which are registered, which are new, which will never register and why, and fix or load them without restarting. Use this whenever the user says reload skills, refresh skills, rescan skills, re-index skills, roll call, lint my skills, audit my skills, "I just installed a skill", "I just added/edited a SKILL.md", asks whether you can see a particular /skill, asks why a skill is not showing up or not triggering, asks how much context their skills cost, or wants a skills repo checked before publishing. Also use it after you yourself install or write a skill mid-session, to confirm it registered.
 ---
 
 # Skill roll call
 
-Claude Code reads every `SKILL.md`'s frontmatter at session start and watches the
-skills folders for additions and removals. A skill can still fail to appear because
-its frontmatter is malformed, its folder is nested one level too deep (plugin layout),
-its `name` does not match, or the watcher simply has not fired yet. This skill rebuilds
-the same index from disk so you can see exactly what is there, tell the user whether
-each skill is registered, and use an unregistered one right away.
+Claude Code reads every `SKILL.md`'s frontmatter at startup and watches the skills
+folders afterwards, so adds, edits and removals normally show up within the session.
+What it does not do is tell anyone *why* a folder was skipped. This skill rebuilds the
+same index from disk with the reasons attached, then repairs, lints or audits on
+request.
+
+The script is at `scripts/rollcall.py` next to this file (installed as a skill that is
+`~/.claude/skills/skill-rollcall/scripts/rollcall.py`). It is stdlib-only and read-only
+unless `--fix --apply` is passed.
+
+## Pick the mode from what the user asked
+
+| The user says | Run |
+|---|---|
+| "do you see /x", "reload skills", "is it registered" | `--known <names>` |
+| "why isn't it showing up", "it's not loading" | default (errors section) then `--fix` |
+| "why isn't it triggering", "which should I trim", "how much context" | `--lint` |
+| "is this skill safe", "scan these", anything after a bulk install | `--audit` |
+| "check my skills repo before I publish" | `--skills-dir <repo>/skills --lint --audit --strict` |
+
+Flags combine. `--problems-only` drops the table when only findings matter; `--json`
+when you need to process the result.
 
 ## Steps
 
-1. Run the indexer, passing the names the harness has already given you. Those are the
-   skills listed in your system context for the `Skill` tool. This lets the script mark
-   each row registered or NEW rather than making you compare by eye:
+1. Run it. For `--known`, pass the skill names from your own system context - the
+   list the `Skill` tool accepts. That turns "compare by eye" into a diff: rows
+   become **registered** or **NEW**, and names the harness lists but that no longer
+   exist on disk are reported as stale.
 
-   ```bash
-   python ~/.claude/skills/skill-rollcall/scripts/rollcall.py --known name1,name2,...
-   ```
+2. Answer the question first, then summarize. If they asked about one skill, lead with
+   that skill's line. Then, briefly:
+   - **errors** - folders that will never register. Give the one-line fix each:
+     add frontmatter, close it, add a `name`, move a nested folder up. If the script
+     planned a fix, offer `--fix --apply`; show the dry run first so they can see the
+     moves.
+   - **warnings** - registers, but: no description (never auto-triggers), `name` not
+     matching the folder, duplicate names across scopes, and under `--lint` the
+     description-quality findings. These are why "it's installed but never fires".
+   - **NEW** - on disk, not yet in your index. Usually it appears on the next turn.
+     If they want it now, do step 3.
+   - **audit** - `high` findings deserve a direct read of the file before the user
+     runs that skill. `review` hits are phrases that are ordinary inside a security
+     or prompt-testing skill (a jailbreak signature table will contain "ignore
+     previous instructions"); read them in context and say what you found rather
+     than just relaying the count. `info` is external hosts the skill references.
 
-   If installed as a plugin the script lives under the plugin root instead; use the
-   path relative to this SKILL.md (`scripts/rollcall.py`).
-
-   Pass `--full` if the user wants complete descriptions, `--json` if you need to
-   process the output, and `--project <dir>` if the project's `.claude/skills` is
-   somewhere other than the current directory. If assembling the `--known` list is
-   impractical, run it without and compare the output against your listing yourself.
-
-2. Report to the user in three groups, briefly:
-   - **Registered** - on disk and in your listing. Nothing to do.
-   - **NEW** - on disk but not in your listing. Say that these will usually register on
-     the next turn without any action, and offer to use one now (step 3).
-   - **Problems** - folders that will never register, with the script's reason. These
-     are the ones the user actually needs to fix; give the one-line fix for each
-     (add frontmatter, move the nested folder up, rename the folder to match `name`,
-     add a description).
-
-   Do not paste the whole table back when only a few rows matter. The user asked a
-   question - "do you see X?", "why isn't Y triggering?" - so answer that first, then
-   summarize the rest in a sentence.
+   Do not paste the whole table back when a few rows matter. Say the count, name
+   the exceptions.
 
 3. To use a NEW skill before the harness registers it, read its `SKILL.md` and follow
-   it as if the `Skill` tool had loaded it. That is all the `Skill` tool does: it puts
-   the file body into context. Read any `scripts/` or `references/` it points to when
-   the instructions call for them. Tell the user you loaded it manually so they know
-   the slash form may not work yet.
+   it. That is all the `Skill` tool does: it puts the file body into context. Read
+   any `scripts/` or `references/` it points to when the instructions call for them.
+   Tell the user you loaded it manually so they know the slash form may lag.
 
-4. If a skill is on disk with no problems but still is not registered after another
-   turn, the fallback is `/clear`, which reruns discovery. Mention that it wipes the
-   conversation, so the user can finish anything in flight first.
+4. If a skill is on disk with no errors and still not registered after another turn,
+   the watcher is probably not running. That is the case in `--bare` mode. `/clear`
+   reruns discovery but wipes the conversation, so let them finish anything in
+   flight. For a plugin, changes to `hooks/`, `agents/` or `.mcp.json` need
+   `/reload-plugins`; SKILL.md text does not.
+
+## Related, not overlapping
+
+`/skill-doctor` (Claude Code 2.1.252+) reports what each skill *costs* and how often
+it is *used*. It does not say why a skill failed to register. When the user's real
+question is "which skills should I turn off", point them there; the context-cost line
+here is a rough stand-in for when `/skill-doctor` is unavailable.
 
 ## What this cannot do
 
-It cannot force the harness to rescan; only the harness does that. Edits to an
-existing skill's `description` may not be picked up until the next session, though
-edits to the body are read fresh every time the skill is invoked. Be honest about this
-distinction when the user is trying to fix triggering: a body edit is live, a
-description edit needs `/clear` or a new session to be certain.
+It cannot make the harness rescan; only the harness does that. It does not evaluate
+whether a description *will* trigger for a given phrase - `--lint` catches the
+structural reasons a description under-triggers (too short, no "use when", overlaps
+with a sibling), not the semantic ones. And `--audit` is a pattern scan, not a
+verdict: a clean audit means nothing obvious was found, not that the skill is safe.

@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.1.0 - 2026-09-19
+
+- `--lint`: description quality (too short, no "use when" cue, near-duplicate of a
+  sibling, heavy) and a per-session context-cost estimate.
+- `--audit`: content scan for hidden Unicode, pipe-to-shell, permission-bypass flags,
+  injection phrasing, encoded blobs and unfamiliar hosts, with high / review / info
+  severities. Dangerous strings inside test files are downgraded to review.
+- `--fix` / `--fix --apply`: un-nest manifest-less plugin layouts and rename folders
+  to match `name`. Dry run by default; never touches the plugin cache.
+- `--strict` exit code and `--skills-dir` for checking a skills repo in CI.
+- Scopes: project walk-up to the git root, `--add-dir`, plugin cache and synced
+  plugins, and skills-directory plugins (`.claude-plugin/plugin.json` + `skills/`),
+  which are now correctly recognised as valid rather than flagged as nested.
+- Errors (will not register) and warnings (registers, but) are reported separately.
+- 44-test suite and a CI matrix (Windows / macOS / Linux, Python 3.10 / 3.13) that
+  also runs the tool on its own skill in strict mode.
+- Docs corrected: Claude Code hot-reloads SKILL.md edits, not just adds and removes;
+  `--bare` mode is the case without a watcher; `/reload-plugins` for plugin hooks.
+
 ## 1.0.0 - 2026-09-19
 
 Initial release.

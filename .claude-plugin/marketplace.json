@@ -10,7 +10,7 @@
       "name": "skill-rollcall",
       "source": "./",
       "description": "Take a roll call of installed Claude Code skills: refresh mid-session, diagnose broken ones, load new ones without restarting.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "keywords": ["claude-code", "skills", "reload", "diagnostics"]
     }
   ]
