@@ -13,6 +13,8 @@
 
 <img src="docs/demo.png" alt="skill-rollcall output: loadable skills, warnings, errors, harness diff and a fix plan" width="900">
 
+<sub>Part of the rollcall family — tools that make what Claude Code does silently legible: **skill-rollcall** · [mcp-rollcall](https://github.com/Londopy/mcp-rollcall) · [settings-effective](https://github.com/Londopy/settings-effective) · [git-attribution](https://github.com/Londopy/git-attribution)</sub>
+
 </div>
 
 ---
