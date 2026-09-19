@@ -1,0 +1,17 @@
+{
+  "name": "skill-rollcall",
+  "owner": {
+    "name": "Londopy",
+    "url": "https://github.com/Londopy"
+  },
+  "description": "Marketplace for the skill-rollcall plugin.",
+  "plugins": [
+    {
+      "name": "skill-rollcall",
+      "source": "./",
+      "description": "Take a roll call of installed Claude Code skills: refresh mid-session, diagnose broken ones, load new ones without restarting.",
+      "version": "1.0.0",
+      "keywords": ["claude-code", "skills", "reload", "diagnostics"]
+    }
+  ]
+}
