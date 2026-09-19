@@ -298,6 +298,19 @@ class Audit(Base):
         d = skill(self.home, "skip")
         write(d / "run.sh", "claude --dangerously-skip-permissions -p hi\n")
         self.assertEqual(self.severities("skip")["skips-permissions"], "high")
+        d = skill(self.home, "mode")
+        write(d / "run.sh", "claude --permission-mode bypassPermissions -p hi\n")
+        self.assertEqual(self.severities("mode")["skips-permissions"], "high")
+
+    def test_naming_bypass_mode_is_review(self):
+        # a settings or permissions tool has to say the word to report on it
+        d = skill(self.home, "settings-tool")
+        write(d / "scripts" / "tool.py", "# reports permissions\nif mode == 'bypassPermissions':\n    warn()\n")
+        sev = self.severities("settings-tool")
+        self.assertEqual(sev["names-bypass"], "review")
+        self.assertNotIn("skips-permissions", sev)
+        row = self.by_dir(self.run_json("--audit"), "settings-tool")
+        self.assertEqual(next(f for f in row["audit"] if f["kind"] == "names-bypass")["file"], "scripts/tool.py:2")
 
     def test_injection_phrases_are_review_with_line(self):
         d = skill(self.home, "inj")

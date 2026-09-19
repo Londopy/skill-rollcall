@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.1 - 2026-09-19
+
+- `--audit`: `skips-permissions` (high) now fires only on *invoking* bypass -
+  `--dangerously-skip-permissions` or `--permission-mode bypassPermissions`. Merely
+  naming the mode is the new `names-bypass` finding at `review` severity, with a line
+  number, because a tool that reports on permission settings has to say the word.
+  Previously any file containing `bypassPermissions` was `high`.
+
 ## 1.1.0 - 2026-09-19
 
 - `--lint`: description quality (too short, no "use when" cue, near-duplicate of a

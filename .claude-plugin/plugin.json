@@ -1,7 +1,7 @@
 {
   "name": "skill-rollcall",
   "displayName": "Skill Rollcall",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Take a roll call of installed Claude Code skills: refresh Claude's view mid-session, flag skills that will never register, and load new ones without restarting.",
   "author": {
     "name": "Londopy",

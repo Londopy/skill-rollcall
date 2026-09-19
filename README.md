@@ -103,7 +103,8 @@ Scopes it covers: `~/.claude/skills`, every `.claude/skills` from cwd up to the 
 | `name` ≠ folder | warning | Slash command uses `name`; confusing | `--fix --apply` renames the folder |
 | Duplicate name across scopes | warning | One silently wins | Rename or remove one |
 | `--lint`: short / no cue / overlap / heavy | warning | The structural reasons a skill under-triggers or over-triggers | Reword the description |
-| `--audit`: hidden Unicode, `curl \| sh`, permission bypass | high | Classic ways a skill hides or escalates | Read the file before running the skill |
+| `--audit`: hidden Unicode, `curl \| sh`, invoking `--dangerously-skip-permissions` | high | Classic ways a skill hides or escalates | Read the file before running the skill |
+| `--audit`: naming `bypassPermissions` | review | Normal in a settings or permissions tool; suspicious elsewhere | Read in context |
 | `--audit`: injection phrasing, encoded blobs | review | Normal inside a security skill's signature table; suspicious elsewhere | Read in context |
 | `--audit`: unfamiliar host | info | Where the skill phones | Decide if you expect it |
 

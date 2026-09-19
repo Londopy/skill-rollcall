@@ -213,7 +213,10 @@ def lint(skills: list[Skill]) -> None:
 
 HIDDEN = re.compile("[\u200b-\u200f\u202a-\u202e\u2060-\u2064\ufeff]")
 PIPE_TO_SHELL = re.compile(r"\b(curl|wget|iwr|Invoke-WebRequest)\b[^|\n]*\|\s*(sudo\s+)?(ba|z|)sh\b", re.I)
-SKIP_PERMS = re.compile(r"dangerously[-]skip[-]permissions|bypass[P]ermissions", re.I)
+# Invoking bypass is high; merely naming the mode is review - a tool that reports on
+# permission settings has to say "bypassPermissions" to do its job.
+SKIP_PERMS = re.compile(r"dangerously[-]skip[-]permissions|permission-mode[= ]+bypass[P]ermissions", re.I)
+NAMES_BYPASS = re.compile(r"bypass[P]ermissions", re.I)
 PHRASES = [
     (re.compile(r"ignore (?:all |any )?(?:previous|prior|above) (?:instructions|rules|prompts)", re.I), "ignore-previous-instructions"),
     (re.compile(r"disregard (?:your|all|the|any) (?:instructions|rules|guidelines)", re.I), "disregard-instructions"),
@@ -254,7 +257,11 @@ def audit(s: Skill) -> None:
                             "detail": m.group(0)[:100]})
         if SKIP_PERMS.search(text):
             s.audit.append({"severity": high, "kind": "skips-permissions", "file": rel,
-                            "detail": "references bypassing the permission prompt"})
+                            "detail": "invokes bypassing the permission prompt"})
+        elif (m := NAMES_BYPASS.search(text)):
+            line = text.count("\n", 0, m.start()) + 1
+            s.audit.append({"severity": "review", "kind": "names-bypass", "file": f"{rel}:{line}",
+                            "detail": "mentions bypassPermissions - fine in a settings or permissions tool, read it in context"})
         for rx, kind in PHRASES:
             for m in rx.finditer(text):
                 line = text.count("\n", 0, m.start()) + 1
