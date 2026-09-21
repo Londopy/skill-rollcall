@@ -1,0 +1,5 @@
+# Optional Codex / ChatGPT metadata (developers.openai.com/codex/skills). Other hosts ignore it.
+interface:
+  display_name: "Skill roll call"
+  short_description: "Which skills registered, which never will, and why"
+  default_prompt: "Take a roll call of my installed skills and tell me what will not register."

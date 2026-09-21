@@ -9,9 +9,17 @@
     {
       "name": "skill-rollcall",
       "source": "./",
-      "description": "Take a roll call of installed Claude Code skills: refresh mid-session, diagnose broken ones, load new ones without restarting.",
-      "version": "1.1.1",
-      "keywords": ["claude-code", "skills", "reload", "diagnostics"]
+      "description": "Take a roll call of installed skills in Claude Code, Codex, Cursor, Gemini CLI and other Agent Skills hosts: diagnose broken ones, load new ones without restarting.",
+      "version": "1.2.0",
+      "keywords": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "agent-skills",
+        "skills",
+        "reload",
+        "diagnostics"
+      ]
     }
   ]
 }

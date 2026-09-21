@@ -1,8 +1,8 @@
 {
   "name": "skill-rollcall",
   "displayName": "Skill Rollcall",
-  "version": "1.1.1",
-  "description": "Take a roll call of installed Claude Code skills: refresh Claude's view mid-session, flag skills that will never register, and load new ones without restarting.",
+  "version": "1.2.0",
+  "description": "Take a roll call of installed skills in any Agent Skills host - Claude Code, Codex, Cursor, Gemini CLI, Copilot, OpenCode - flag skills that will never register and why, lint and audit them, and load new ones without restarting.",
   "author": {
     "name": "Londopy",
     "url": "https://github.com/Londopy"
@@ -10,5 +10,19 @@
   "homepage": "https://github.com/Londopy/skill-rollcall",
   "repository": "https://github.com/Londopy/skill-rollcall",
   "license": "MIT",
-  "keywords": ["claude-code", "skills", "skill", "reload", "index", "diagnostics", "plugin"]
+  "keywords": [
+    "claude-code",
+    "codex",
+    "cursor",
+    "gemini-cli",
+    "copilot",
+    "opencode",
+    "agent-skills",
+    "skills",
+    "skill",
+    "reload",
+    "index",
+    "diagnostics",
+    "plugin"
+  ]
 }

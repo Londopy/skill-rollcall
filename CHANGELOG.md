@@ -1,5 +1,31 @@
 # Changelog
 
+## 1.2.0 - 2026-09-21
+
+- Multi-host: the roll call now covers every Agent Skills host, not just Claude Code.
+  `--agent` picks Claude Code, Codex, Cursor, Gemini CLI, Copilot, OpenCode, Amp, Goose,
+  Kiro, Windsurf, the universal `~/.agents/skills` convention, a comma list, or `all`;
+  with no flag the host is detected from `CLAUDECODE`, `CODEX_SANDBOX`, `CURSOR_AGENT`
+  or `GEMINI_CLI`, and falls back to `all`. The report header names the host and every
+  root it found, and under several hosts rows are grouped by who reads them.
+- Project walk-up now finds `.agents/skills` (and `.goose/`, `.kiro/`, `.windsurf/`)
+  alongside `.claude/skills`; `--add-dir` includes them too.
+- Duplicate and overlap warnings only fire when one host would see both skills: the
+  same skill installed for Claude Code and for Codex is a copy, not a conflict.
+- Codex: skills switched off with `[[skills.config]] enabled = false` in
+  `~/.codex/config.toml` (or a project's `.codex/config.toml`) are reported as warnings.
+  TOML is read with `tomllib` on 3.11+ and a small stdlib fallback on 3.10.
+- Agent Skills spec checks: a `name` outside `^[a-z0-9]+(-[a-z0-9]+)*$` or over 64
+  chars, and a description over 1024 chars, are warnings ("strict hosts skip it").
+  `--lint` flags Claude-only frontmatter (`context:`) when other hosts read the skill.
+- `--audit`: Codex's `--dangerously-bypass-approvals-and-sandbox` and the `--yolo` alias
+  (Codex and Gemini CLI) count as `skips-permissions`; `approval_policy = "never"` is a
+  `review` hit; openai.com, cursor.com, agentskills.io and skills.sh join the known hosts.
+- JSON rows gain `agent`, `where`, `visible_to` and `frontmatter_keys`.
+- SKILL.md rewritten for any host, with spec `license`, `compatibility` and `metadata`
+  frontmatter; `agents/openai.yaml` added for Codex / ChatGPT UI metadata.
+- 21 new tests (66 total), including a fallback-vs-`tomllib` equivalence check.
+
 ## 1.1.1 - 2026-09-19
 
 - `--audit`: `skips-permissions` (high) now fires only on *invoking* bypass -

@@ -21,8 +21,8 @@ jobs:
           python-version: ${{ matrix.python }}
       - name: Unit tests
         run: python -m unittest discover -s tests -v
-      - name: Roll call of this repo's own skill (lint + audit, strict)
+      - name: Roll call of this repo's own skill for every host (lint + audit, strict)
         run: >
           python skills/skill-rollcall/scripts/rollcall.py
-          --claude-home ./.no-such-home --no-plugins --project .
-          --skills-dir skills --lint --audit --strict --full
+          --home ./.no-such-home --claude-home ./.no-such-home --no-plugins --project .
+          --skills-dir skills --agent all --lint --audit --strict --full

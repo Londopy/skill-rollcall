@@ -33,7 +33,12 @@ def write(p: Path, text: str) -> None:
 
 
 def fixture(home: Path) -> None:
-    s = home / "skills"
+    s = home / ".claude" / "skills"
+    # the same two skills installed for Codex too, plus one only Codex has
+    a = home / ".agents" / "skills"
+    write(a / "strict-api" / "SKILL.md", "---\nname: strict-api\ndescription: Use when the user says 'no hallucinations' or 'verify APIs'. Prevents calling methods that do not exist.\n---\n")
+    write(a / "grill-me" / "SKILL.md", "---\nname: grill-me\ndescription: Interview the user relentlessly about a plan until reaching shared understanding. Use when the user says 'grill me'.\n---\n")
+    write(a / "gh-fix-ci" / "SKILL.md", "---\nname: gh-fix-ci\ndescription: Use when a GitHub Actions run fails - find the failing job, read the log, propose the fix.\n---\n")
     write(s / "strict-api" / "SKILL.md", "---\nname: strict-api\ndescription: Use when the user says 'no hallucinations' or 'verify APIs'. Prevents calling methods that do not exist.\n---\n")
     write(s / "grill-me" / "SKILL.md", "---\nname: grill-me\ndescription: Interview the user relentlessly about a plan until reaching shared understanding. Use when the user says 'grill me'.\n---\n")
     write(s / "prime-backend" / "SKILL.md", "---\nname: prime-backend\ndescription: Primes the agent with focused understanding of the backend portion of the codebase without loading unrelated code.\n---\n")
@@ -51,12 +56,13 @@ def main() -> None:
         fixture(home)
         buf = io.StringIO()
         with redirect_stdout(buf):
-            rollcall.main(["--claude-home", str(home), "--no-plugins", "--project", tmp,
+            rollcall.main(["--home", str(home), "--no-plugins", "--project", tmp, "--agent", "claude,codex",
                            "--known", "strict-api,grill-me,prime-backend,prime-frontend,deploy-helper,old-skill",
                            "--lint", "--fix"])
-        out = buf.getvalue().replace(str(home / "skills"), "~/.claude/skills").replace("\\", "/")
+        out = (buf.getvalue().replace(str(home / ".claude" / "skills"), "~/.claude/skills")
+               .replace(str(home / ".agents" / "skills"), "~/.agents/skills").replace("\\", "/"))
 
-    lines = ["$ python rollcall.py --known $HARNESS --lint --fix", ""] + out.rstrip().splitlines()
+    lines = ["$ python rollcall.py --agent claude,codex --known $HARNESS --lint --fix", ""] + out.rstrip().splitlines()
     lines = [l if len(l) <= 100 else l[:99] + "…" for l in lines]
     font = ImageFont.truetype(str(FONT), 15)
     lh = 22
@@ -75,11 +81,12 @@ def main() -> None:
         color = FG
         if line.startswith("$ "):
             color = GREEN
-        elif line.startswith(("warnings", "errors", "fix plan", "new since", "listed by harness", "context cost")):
+        elif line.startswith(("warnings", "errors", "fix plan", "new since", "listed by harness", "context cost",
+                              "host:", "roots:")):
             color = BLUE
         elif "[NEW" in line:
             color = GREEN
-        elif "[skills-dir plugin]" in line or "[project]" in line:
+        elif line.startswith("[") or "[skills-dir plugin]" in line or "[project]" in line:
             color = PURPLE
         elif re.match(r"\s{2}\S.*(will not register|no SKILL.md|nested at|never closed|no frontmatter|has no name)", line):
             color = RED

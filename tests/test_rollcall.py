@@ -31,9 +31,14 @@ def skill(root: Path, name: str, desc: str = "Use when testing.", folder: str | 
 
 
 class Base(unittest.TestCase):
+    """Every test runs against a throwaway --home (for every other host's folders) and
+    --claude-home, so nothing here can touch a real skills folder. --no-plugins keeps
+    the real plugin cache out too. Tests pin --agent claude unless they pass their own."""
+
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
-        self.home = Path(self._tmp.name) / "claude-home"
+        self.fake_home = Path(self._tmp.name) / "home"
+        self.home = self.fake_home / "claude-home"
         (self.home / "skills").mkdir(parents=True)
         # an empty, git-rooted project dir so the walk-up never escapes the temp
         self.project = Path(self._tmp.name) / "proj"
@@ -44,9 +49,10 @@ class Base(unittest.TestCase):
 
     def run_cli(self, *args: str) -> tuple[int, str]:
         buf = io.StringIO()
+        agent = [] if "--agent" in args else ["--agent", "claude"]
         with redirect_stdout(buf):
-            rc = rollcall.main(["--claude-home", str(self.home), "--no-plugins",
-                                "--project", str(self.project), *args])
+            rc = rollcall.main(["--home", str(self.fake_home), "--claude-home", str(self.home),
+                                "--no-plugins", "--project", str(self.project), *agent, *args])
         return rc, buf.getvalue()
 
     def run_json(self, *args: str) -> list[dict]:
@@ -197,7 +203,8 @@ class Scopes(Base):
               "---\nname: cached\ndescription: Use when cached.\n---\n")
         buf = io.StringIO()
         with redirect_stdout(buf):
-            rollcall.main(["--claude-home", str(self.home), "--project", str(self.project), "--json"])
+            rollcall.main(["--home", str(self.fake_home), "--claude-home", str(self.home),
+                           "--project", str(self.project), "--agent", "claude", "--json"])
         row = self.by_dir(json.loads(buf.getvalue()), "cached")
         self.assertEqual(row["scope"], "plugin")
         self.assertEqual(row["name"], "toolkit:cached")
