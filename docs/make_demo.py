@@ -36,13 +36,13 @@ def fixture(home: Path) -> None:
     s = home / ".claude" / "skills"
     # the same two skills installed for Codex too, plus one only Codex has
     a = home / ".agents" / "skills"
-    write(a / "strict-api" / "SKILL.md", "---\nname: strict-api\ndescription: Use when the user says 'no hallucinations' or 'verify APIs'. Prevents calling methods that do not exist.\n---\n")
-    write(a / "grill-me" / "SKILL.md", "---\nname: grill-me\ndescription: Interview the user relentlessly about a plan until reaching shared understanding. Use when the user says 'grill me'.\n---\n")
-    write(a / "gh-fix-ci" / "SKILL.md", "---\nname: gh-fix-ci\ndescription: Use when a GitHub Actions run fails - find the failing job, read the log, propose the fix.\n---\n")
-    write(s / "strict-api" / "SKILL.md", "---\nname: strict-api\ndescription: Use when the user says 'no hallucinations' or 'verify APIs'. Prevents calling methods that do not exist.\n---\n")
-    write(s / "grill-me" / "SKILL.md", "---\nname: grill-me\ndescription: Interview the user relentlessly about a plan until reaching shared understanding. Use when the user says 'grill me'.\n---\n")
-    write(s / "prime-backend" / "SKILL.md", "---\nname: prime-backend\ndescription: Primes the agent with focused understanding of the backend portion of the codebase without loading unrelated code.\n---\n")
-    write(s / "prime-frontend" / "SKILL.md", "---\nname: prime-frontend\ndescription: Primes the agent with focused understanding of the frontend portion of the codebase without loading unrelated code.\n---\n")
+    write(a / "release-notes" / "SKILL.md", "---\nname: release-notes\ndescription: Draft release notes from the commits since the last tag. Use when the user asks for a changelog, release notes or 'what shipped'.\n---\n")
+    write(a / "pdf-forms" / "SKILL.md", "---\nname: pdf-forms\ndescription: Fill, flatten and merge PDF forms. Use when the user mentions PDFs, forms or a document to fill in.\n---\n")
+    write(a / "ci-triage" / "SKILL.md", "---\nname: ci-triage\ndescription: Use when a CI run fails - find the failing job, read the log, propose the fix.\n---\n")
+    write(s / "release-notes" / "SKILL.md", "---\nname: release-notes\ndescription: Draft release notes from the commits since the last tag. Use when the user asks for a changelog, release notes or 'what shipped'.\n---\n")
+    write(s / "pdf-forms" / "SKILL.md", "---\nname: pdf-forms\ndescription: Fill, flatten and merge PDF forms. Use when the user mentions PDFs, forms or a document to fill in.\n---\n")
+    write(s / "load-backend" / "SKILL.md", "---\nname: load-backend\ndescription: Loads the backend half of the codebase into context, services and models only, without the rest of the tree.\n---\n")
+    write(s / "load-frontend" / "SKILL.md", "---\nname: load-frontend\ndescription: Loads the frontend half of the codebase into context, components and routes only, without the rest of the tree.\n---\n")
     write(s / "deploy-helper" / "SKILL.md", "---\nname: deploy-helper\n---\n")
     write(s / "dragged-plugin" / "skills" / "changelog" / "SKILL.md", "---\nname: changelog\ndescription: Use when writing release notes.\n---\n")
     write(s / "just-a-readme" / "README.md", "# oops\n")
@@ -57,7 +57,7 @@ def main() -> None:
         buf = io.StringIO()
         with redirect_stdout(buf):
             rollcall.main(["--home", str(home), "--no-plugins", "--project", tmp, "--agent", "claude,codex",
-                           "--known", "strict-api,grill-me,prime-backend,prime-frontend,deploy-helper,old-skill",
+                           "--known", "release-notes,pdf-forms,load-backend,load-frontend,deploy-helper,old-skill",
                            "--lint", "--fix"])
         out = (buf.getvalue().replace(str(home / ".claude" / "skills"), "~/.claude/skills")
                .replace(str(home / ".agents" / "skills"), "~/.agents/skills").replace("\\", "/"))
